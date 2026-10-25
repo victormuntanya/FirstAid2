@@ -20,7 +20,18 @@ enum class EmergencyCategory(val id: String, val titleChichewa: String, val titl
     DROWNING("drowning", "Kumira M'madzi", "Drowning"),
     SNAKE_BITES("snake_bites", "Kulumwa Ndi Njoka", "Snake Bites"),
     FAINTING("fainting", "Kukomoka", "Fainting & Unconsciousness"),
-    POISONING("poisoning", "Apoizoni / Mankhwala", "Poisoning")
+    POISONING("poisoning", "Apoizoni / Mankhwala", "Poisoning"),
+    CPR_HEART_ATTACK("cpr_heart", "Kuyima Mtima / CPR", "CPR & Heart Attack"),
+    STROKE("stroke", "Kufa Ziwalo (Stroke)", "Stroke & Paralysis"),
+    SEIZURES("seizures", "Kukomoka kwa Khunyu", "Seizures & Epilepsy"),
+    ALLERGIES("allergies", "Kusamva Mankhwala (Allergy)", "Severe Allergies & Shock"),
+    ANIMAL_BITES("animal_bites", "Kulumwa Ndi Galu / Chiwanda", "Dog & Animal Bites (Rabies)"),
+    HEAT_STROKE("heat_stroke", "Kutenthedwa Kwambiri", "Heat Stroke"),
+    ASTHMA("asthma", "Kukanika Kupuma (Asitima)", "Asthma Attack"),
+    DIABETES("diabetes", "Shuga Wokwera / Wogwa", "Diabetic Emergency"),
+    EYE_INJURIES("eye_injuries", "Kuvulala M'maso", "Eye Injuries"),
+    HEAD_INJURY("head_injury", "Kuvulala Mutu / Khosi", "Head & Spine Injury"),
+    EMERGENCY_BIRTH("emergency_birth", "Kubeleka Mwadzidzidzi", "Emergency Labor & Birth")
 }
 
 data class StepItem(
