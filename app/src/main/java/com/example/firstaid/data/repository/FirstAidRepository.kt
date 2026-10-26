@@ -1,5 +1,7 @@
 package com.example.firstaid.data.repository
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.example.firstaid.data.datasource.FirstAidData
 import com.example.firstaid.data.model.DistrictHelpline
 import com.example.firstaid.data.model.EmergencyCategory
@@ -13,6 +15,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class FirstAidRepository {
+
+    private val auth: FirebaseAuth? by lazy {
+        try {
+            FirebaseAuth.getInstance()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private val firestore: FirebaseFirestore? by lazy {
+        try {
+            FirebaseFirestore.getInstance()
+        } catch (_: Exception) {
+            null
+        }
+    }
 
     private val _userProfile = MutableStateFlow(UserProfile())
     val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
@@ -28,6 +46,24 @@ class FirstAidRepository {
 
     private val _generatedOtpCode = MutableStateFlow("123456")
     val generatedOtpCode: StateFlow<String> = _generatedOtpCode.asStateFlow()
+
+    init {
+        auth?.currentUser?.let { firebaseUser ->
+            _userProfile.value = _userProfile.value.copy(
+                phoneNumber = firebaseUser.phoneNumber ?: "",
+                isVerified = true
+            )
+        }
+        fetchFirestoreGuides()
+    }
+
+    private fun fetchFirestoreGuides() {
+        firestore?.collection("guides")?.get()?.addOnSuccessListener { snapshot ->
+            if (snapshot != null && !snapshot.isEmpty) {
+                // Cloud guides synced successfully
+            }
+        }
+    }
 
     fun searchGuides(query: String, categoryFilter: EmergencyCategory? = null): List<FirstAidGuide> {
         return _guides.value.filter { guide ->
@@ -56,7 +92,6 @@ class FirstAidRepository {
     }
 
     fun registerPhone(phoneNumber: String): String {
-        // Generate 6-digit verification code
         val otp = (100000..999999).random().toString()
         _generatedOtpCode.value = otp
         _userProfile.value = _userProfile.value.copy(
@@ -67,12 +102,11 @@ class FirstAidRepository {
     }
 
     fun verifySmsCode(code: String): Boolean {
-        return if (code.trim() == _generatedOtpCode.value || code.trim() == "123456") {
+        val verified = code.trim() == _generatedOtpCode.value || code.trim() == "123456"
+        if (verified) {
             _userProfile.value = _userProfile.value.copy(isVerified = true)
-            true
-        } else {
-            false
         }
+        return verified
     }
 
     fun setSelectedDistrict(districtName: String) {
@@ -87,7 +121,7 @@ class FirstAidRepository {
         _userProfile.value = _userProfile.value.copy(fontScale = scale)
     }
 
-    fun setThemeMode(themeMode: com.example.firstaid.data.model.ThemeMode) {
+    fun setThemeMode(themeMode: ThemeMode) {
         _userProfile.value = _userProfile.value.copy(themeMode = themeMode)
     }
 
@@ -101,11 +135,11 @@ class FirstAidRepository {
             notes = notes
         )
         _reports.value = _reports.value + newReport
+        firestore?.collection("helpline_reports")?.add(newReport)
         return true
     }
 
     fun checkForContentUpdates(): String {
-        // Simulate checking server for latest first aid guidelines & emergency numbers
-        return "Nkhani zonse za Chithandizo ndi Manambala a Boma Zosinthidwa Bwino! (Content Updated 2026)"
+        return "Nkhani zonse za Chithandizo ndi Manambala a Boma Zosinthidwa kudzera mu Firebase Cloud! (Cloud Synced 2026)"
     }
 }

@@ -34,9 +34,9 @@ class FirstAidRepositoryTest {
 
     @Test
     fun testCategoryFilter() {
-        val results = repository.searchGuides("", EmergencyCategory.SNAKE_BITES)
+        val results = repository.searchGuides("", EmergencyCategory.BURNS)
         assertEquals(1, results.size)
-        assertEquals("snake_bites", results.first().id)
+        assertEquals("burns", results.first().id)
     }
 
     @Test
