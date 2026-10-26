@@ -1,4 +1,4 @@
-package com.example.firstaid.ui.components
+ package com.example.firstaid.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
