@@ -1,5 +1,6 @@
 package com.example.firstaid
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -34,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -230,6 +232,8 @@ fun FirstAidMainApp(
 
             // 1. Phone Sign-Up Modal (FR1 & FR2)
             if (showAuthModal) {
+                val context = LocalContext.current
+                val activity = context as? Activity
                 PhoneAuthModal(
                     userProfile = userProfile,
                     authPhoneInput = authPhoneInput,
@@ -239,7 +243,7 @@ fun FirstAidMainApp(
                     authSuccessMessage = authSuccessMessage,
                     onPhoneInputChange = { viewModel.updateAuthPhoneInput(it) },
                     onOtpInputChange = { viewModel.updateAuthOtpInput(it) },
-                    onSendSmsCode = { viewModel.sendSmsCode() },
+                    onSendSmsCode = { viewModel.sendSmsCode(activity) },
                     onVerifySmsCode = { viewModel.verifySmsCode() },
                     onDismiss = { viewModel.closeAuthModal() }
                 )

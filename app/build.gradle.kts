@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    alias(libs.plugins.google.firebase.appdistribution)
 }
 
 android {
@@ -39,6 +40,7 @@ android {
 
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
+    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
     implementation("androidx.compose.material:material-icons-core")
@@ -49,11 +51,13 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-functions")
+    implementation("com.google.firebase:firebase-storage")
     testImplementation(libs.junit)
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
-    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -49,7 +49,6 @@ import com.example.firstaid.data.model.FirstAidGuide
 import com.example.firstaid.data.model.Language
 import com.example.firstaid.data.model.UserProfile
 import com.example.firstaid.ui.theme.DarkSlateHeader
-import com.example.firstaid.ui.theme.EmergencyRed
 import com.example.firstaid.ui.theme.LightTealContainer
 import com.example.firstaid.ui.theme.PrimaryTeal
 
@@ -411,44 +410,6 @@ fun GuideCardItem(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                 lineHeight = (18 * fontScale).sp
             )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // First step preview banner
-            guide.steps.firstOrNull()?.let { firstStep ->
-                Surface(
-                    color = Color(0xFFF8FAFC),
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier.padding(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(22.dp)
-                                .clip(CircleShape)
-                                .background(EmergencyRed),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "1",
-                                color = Color.White,
-                                fontSize = (11 * fontScale).sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = if (lang == Language.CHICHEWA) firstStep.titleChichewa else firstStep.titleEnglish,
-                            fontSize = (12 * fontScale).sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF1E293B)
-                        )
-                    }
-                }
-            }
         }
     }
 }

@@ -43,6 +43,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -134,6 +137,8 @@ fun PhoneAuthModal(
                     onValueChange = onPhoneInputChange,
                     label = { Text(if (userProfile.preferredLanguage == Language.CHICHEWA) "Nambala ya Foni (e.g. 0999123456)" else "Phone Number") },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    textStyle = TextStyle(color = Color.Black),
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -157,6 +162,8 @@ fun PhoneAuthModal(
                         onValueChange = onOtpInputChange,
                         label = { Text(if (userProfile.preferredLanguage == Language.CHICHEWA) "Khodi ya SMS (e.g. 123456)" else "SMS Code") },
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        textStyle = TextStyle(color = Color.Black),
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -285,6 +292,7 @@ fun ReportHelplineModal(
                         readOnly = true,
                         label = { Text(if (userLanguage == Language.CHICHEWA) "Mtundu wa Thandizo" else "Service Type") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedServiceType) },
+                        textStyle = TextStyle(color = Color.Black),
                         modifier = Modifier
                             .menuAnchor()
                             .fillMaxWidth(),
@@ -313,6 +321,8 @@ fun ReportHelplineModal(
                     onValueChange = onNumberInputChange,
                     label = { Text(if (userLanguage == Language.CHICHEWA) "Nambala Yolakwika / Yosagwira" else "Incorrect/Outdated Number") },
                     singleLine = true,
+                    textStyle = TextStyle(color = Color.Black),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -323,6 +333,7 @@ fun ReportHelplineModal(
                     value = reportNotesInput,
                     onValueChange = onNotesInputChange,
                     label = { Text(if (userLanguage == Language.CHICHEWA) "Zina Zowonjezera (Optional)" else "Additional Notes") },
+                    textStyle = TextStyle(color = Color.Black),
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 )

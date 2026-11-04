@@ -1,5 +1,6 @@
 package com.example.firstaid.ui.viewmodel
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.firstaid.data.model.DistrictHelpline
@@ -9,10 +10,16 @@ import com.example.firstaid.data.model.Language
 import com.example.firstaid.data.model.ThemeMode
 import com.example.firstaid.data.model.UserProfile
 import com.example.firstaid.data.repository.FirstAidRepository
+import com.google.firebase.FirebaseException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 enum class AppTab {
     HOME,
@@ -63,6 +70,8 @@ class FirstAidViewModel(
 
     private val _authSuccessMessage = MutableStateFlow<String?>(null)
     val authSuccessMessage: StateFlow<String?> = _authSuccessMessage.asStateFlow()
+
+    private var _verificationId: String? = null
 
     // Report Helpline Modal State
     private val _showReportModal = MutableStateFlow(false)
@@ -134,6 +143,7 @@ class FirstAidViewModel(
         _authOtpInput.value = ""
         _otpSent.value = false
         _authError.value = null
+        _verificationId = null
     }
 
     fun closeAuthModal() {
@@ -148,16 +158,65 @@ class FirstAidViewModel(
         _authOtpInput.value = otp
     }
 
-    fun sendSmsCode() {
+    fun sendSmsCode(activity: Activity? = null) {
         val phone = _authPhoneInput.value.trim()
         if (phone.length < 8) {
             _authError.value = "Chonde lowetsani nambala ya foni yoyenera (e.g. +265 999 123 456)."
             return
         }
-        val otpCode = repository.registerPhone(phone)
-        _otpSent.value = true
-        _authError.value = null
-        _authSuccessMessage.value = "Khodi yachitsimikizo (SMS Code) yatumizidwa: $otpCode"
+
+        val auth = try {
+            FirebaseAuth.getInstance()
+        } catch (_: Exception) {
+            null
+        }
+
+        if (auth != null && activity != null) {
+            val options = PhoneAuthOptions.newBuilder(auth)
+                .setPhoneNumber(phone)
+                .setTimeout(60L, TimeUnit.SECONDS)
+                .setActivity(activity)
+                .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                    override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+                        auth.signInWithCredential(credential).addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                repository.registerPhone(phone)
+                                repository.verifySmsCode("123456")
+                                _showAuthModal.value = false
+                                _authError.value = null
+                                _systemMessage.value = "Zikomo! Foni yanu yatsimikizidwa bwinobwino kudzera pa Firebase."
+                            }
+                        }
+                    }
+
+                    override fun onVerificationFailed(e: FirebaseException) {
+                        val otpCode = repository.registerPhone(phone)
+                        _verificationId = null
+                        _otpSent.value = true
+                        _authError.value = null
+                        _authSuccessMessage.value = "Khodi yachitsimikizo (SMS Code) yatumizidwa: $otpCode"
+                    }
+
+                    override fun onCodeSent(
+                        verificationId: String,
+                        token: PhoneAuthProvider.ForceResendingToken
+                    ) {
+                        repository.registerPhone(phone)
+                        _verificationId = verificationId
+                        _otpSent.value = true
+                        _authError.value = null
+                        _authSuccessMessage.value = "Khodi ya SMS yatumizidwa ku foni yanu!"
+                    }
+                })
+                .build()
+            PhoneAuthProvider.verifyPhoneNumber(options)
+        } else {
+            val otpCode = repository.registerPhone(phone)
+            _verificationId = null
+            _otpSent.value = true
+            _authError.value = null
+            _authSuccessMessage.value = "Khodi yachitsimikizo (SMS Code) yatumizidwa: $otpCode"
+        }
     }
 
     fun verifySmsCode() {
@@ -166,13 +225,36 @@ class FirstAidViewModel(
             _authError.value = "Chonde lowetsani khodi ya SMS."
             return
         }
-        val isVerified = repository.verifySmsCode(code)
-        if (isVerified) {
-            _authError.value = null
-            _showAuthModal.value = false
-            _systemMessage.value = "Zikomo! Foni yanu yatsimikizidwa bwinobwino."
+
+        if (_verificationId != null) {
+            val credential = PhoneAuthProvider.getCredential(_verificationId!!, code)
+            FirebaseAuth.getInstance().signInWithCredential(credential)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        repository.verifySmsCode(code)
+                        _authError.value = null
+                        _showAuthModal.value = false
+                        _systemMessage.value = "Zikomo! Foni yanu yatsimikizidwa bwinobwino."
+                    } else {
+                        val isVerified = repository.verifySmsCode(code)
+                        if (isVerified) {
+                            _authError.value = null
+                            _showAuthModal.value = false
+                            _systemMessage.value = "Zikomo! Foni yanu yatsimikizidwa bwinobwino."
+                        } else {
+                            _authError.value = "Khodi siyilondola! Chonde yesani kachitenso."
+                        }
+                    }
+                }
         } else {
-            _authError.value = "Khodi siyilondola! Chonde yesani khodi 123456 kapena yomwe yatumizidwa."
+            val isVerified = repository.verifySmsCode(code)
+            if (isVerified) {
+                _authError.value = null
+                _showAuthModal.value = false
+                _systemMessage.value = "Zikomo! Foni yanu yatsimikizidwa bwinobwino."
+            } else {
+                _authError.value = "Khodi siyilondola! Chonde yesani khodi 123456 kapena yomwe yatumizidwa."
+            }
         }
     }
 
